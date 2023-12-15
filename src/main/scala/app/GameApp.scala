@@ -5,6 +5,7 @@ import zio.http._
 import zio.json._
 import state.GameState
 import units.Game.FightState._
+import java.util.UUID
 
 object GameApp {
   def apply(): Http[GameState, Throwable,Request, Response] = 
@@ -17,5 +18,12 @@ object GameApp {
             case Right(givenName) => GameState.createFight(givenName).map(fight => Response.text(fight.gameId.toString))
           }
         } yield r)
+      case Method.GET -> Root / "getFight" / id => 
+            GameState
+              .getFightState(UUID.fromString(id))
+              .map {
+                case Some(fightState) => Response.json(fightState.toJson)
+                case None => Response.status(Status.NotFound)
+              }        
     }
 }

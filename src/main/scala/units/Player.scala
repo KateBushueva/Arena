@@ -1,10 +1,11 @@
 package units
 
 import zio._
+import zio.json._
 
 object Players {
 
-  trait Player {
+  sealed trait Player {
     val name: String
     val hitPoints : Int
     val attack : Int
@@ -27,6 +28,9 @@ object Players {
     val attack: Int = level * 3
     def hit(): UIO[Int] = ZIO.succeed(level*3)
   }
+
+  implicit val playerEncoder: JsonEncoder[Player] = DeriveJsonEncoder.gen[Player]
+  implicit val playerDecoder: JsonDecoder[Player] = DeriveJsonDecoder.gen[Player]
 
   object BotLvl1 extends Bot(1)
 

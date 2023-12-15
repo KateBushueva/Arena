@@ -1,12 +1,15 @@
 package units
 
 import zio._
-import Players._
+import zio.json._
+
 import java.util.UUID
+
+import Players._
 
 object Game {
   
-  class FightState(val gameId: UUID, player1: Player, player2: Player, val damageReceived1: Int, val damageReceived2: Int) {
+  case class FightState(gameId: UUID, player1: Player, player2: Player, damageReceived1: Int, damageReceived2: Int) {
     def addDamage(player:Player, damage: Int):FightState = player match {
       case _ if player == player1 => new FightState(gameId,player1,player2,damageReceived1+damage,damageReceived2)
       case _ => new FightState(gameId,player1,player2,damageReceived1,damageReceived2+damage)
@@ -17,20 +20,15 @@ object Game {
       case (_,res2) if res2 <= 0 => Some(player1)
       case _ => None
     }
-  } 
+  }
 
   object FightState {
    def apply(gameId: UUID, player1: Player, player2: Player): FightState = new FightState(gameId, player1, player2, 0, 0)
-  }
 
-/**
-  * object User {
-  implicit val encoder: JsonEncoder[User] =
-    DeriveJsonEncoder.gen[User]
-  implicit val decoder: JsonDecoder[User] =
-    DeriveJsonDecoder.gen[User]
-}
-  */
+   implicit val encoder: JsonEncoder[FightState] = DeriveJsonEncoder.gen[FightState]
+   implicit val decoder: JsonDecoder[FightState] = DeriveJsonDecoder.gen[FightState]
+
+  }
 
 
   case class GameFlow() {
