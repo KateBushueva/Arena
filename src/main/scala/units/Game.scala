@@ -18,7 +18,7 @@ object Game {
   ) {
     def addDamage(player: Player, damage: Int): FightState = player match {
       case _ if player == player1 =>
-        new FightState(
+        FightState(
           gameId,
           player1,
           player2,
@@ -26,7 +26,7 @@ object Game {
           damageReceived2
         )
       case _ =>
-        new FightState(
+        FightState(
           gameId,
           player1,
           player2,

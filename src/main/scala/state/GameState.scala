@@ -14,6 +14,7 @@ trait GameState {
   ): Task[Option[Game.FightState]]
   def removeFight(id: UUID): Task[Option[Game.FightState]]
   def getFightState(id: UUID): Task[Option[Game.FightState]]
+  def getFights(): Task[List[Game.FightState]]
 }
 
 object GameState {
@@ -37,4 +38,7 @@ object GameState {
       id: UUID
   ): ZIO[GameState, Throwable, Option[Game.FightState]] =
     ZIO.serviceWithZIO[GameState](_.getFightState(id))
+
+  def getFights(): ZIO[GameState, Throwable, List[Game.FightState]] =
+    ZIO.serviceWithZIO[GameState](_.getFights())
 }
