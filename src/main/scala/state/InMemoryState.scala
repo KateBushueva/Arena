@@ -24,15 +24,13 @@ case class InMemoryGameState(storage: Ref[Map[UUID, FightState]])
   def updateFight(
       id: UUID,
       updatedFight: Game.FightState
-  ): UIO[Option[Game.FightState]] = for {
-    mFight <- storage.get.map(_.get(id))
+  ): UIO[Game.FightState] = for {
     _ <- storage.update(_.updated(id, updatedFight))
-  } yield mFight
+  } yield updatedFight
 
-  def removeFight(id: UUID): UIO[Option[Game.FightState]] = for {
-    mFight <- storage.get.map(_.get(id))
+  def removeFight(id: UUID): UIO[Unit] = for {
     _ <- storage.update(_.removed(id))
-  } yield mFight
+  } yield ()
 
   def getFightState(id: UUID): UIO[Option[Game.FightState]] =
     storage.get.map(_.get(id))

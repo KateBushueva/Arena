@@ -17,7 +17,7 @@ object Game {
       damageReceived2: Int
   ) {
     def addDamage(player: Player, damage: Int): FightState = player match {
-      case _ if player == player1 =>
+      case _ if player == player1 => {
         FightState(
           gameId,
           player1,
@@ -25,7 +25,8 @@ object Game {
           damageReceived1 + damage,
           damageReceived2
         )
-      case _ =>
+      }
+      case _ => {
         FightState(
           gameId,
           player1,
@@ -33,6 +34,7 @@ object Game {
           damageReceived1,
           damageReceived2 + damage
         )
+      }
     }
 
     def getWinner(): Option[Player] = (
@@ -53,18 +55,5 @@ object Game {
       DeriveJsonEncoder.gen[FightState]
     implicit val decoder: JsonDecoder[FightState] =
       DeriveJsonDecoder.gen[FightState]
-
   }
-
-  case class GameFlow() {
-
-    def startNewFight(player1: Player, player2: Player): UIO[FightState] = for {
-      id <- Random.nextUUID
-    } yield FightState(id, player1, player2)
-
-    def hit(player: Player, fightState: FightState): UIO[FightState] = for {
-      damage <- player.hit()
-    } yield fightState.addDamage(player, damage)
-  }
-
 }
