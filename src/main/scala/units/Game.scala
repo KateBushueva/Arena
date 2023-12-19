@@ -9,16 +9,16 @@ import Players._
 
 object Game {
 
-  case class FightState(
+  case class BattleState(
       gameId: UUID,
       player1: Player,
       player2: Player,
       damageReceived1: Int,
       damageReceived2: Int
   ) {
-    def addDamage(player: Player, damage: Int): FightState = player match {
+    def addDamage(player: Player, damage: Int): BattleState = player match {
       case _ if player == player1 => {
-        FightState(
+        BattleState(
           gameId,
           player1,
           player2,
@@ -27,7 +27,7 @@ object Game {
         )
       }
       case _ => {
-        FightState(
+        BattleState(
           gameId,
           player1,
           player2,
@@ -47,13 +47,13 @@ object Game {
     }
   }
 
-  object FightState {
-    def apply(gameId: UUID, player1: Player, player2: Player): FightState =
-      new FightState(gameId, player1, player2, 0, 0)
+  object BattleState {
+    def apply(gameId: UUID, player1: Player, player2: Player): BattleState =
+      new BattleState(gameId, player1, player2, 0, 0)
 
-    implicit val encoder: JsonEncoder[FightState] =
-      DeriveJsonEncoder.gen[FightState]
-    implicit val decoder: JsonDecoder[FightState] =
-      DeriveJsonDecoder.gen[FightState]
+    implicit val encoder: JsonEncoder[BattleState] =
+      DeriveJsonEncoder.gen[BattleState]
+    implicit val decoder: JsonDecoder[BattleState] =
+      DeriveJsonDecoder.gen[BattleState]
   }
 }

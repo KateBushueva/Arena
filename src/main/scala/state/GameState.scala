@@ -7,38 +7,38 @@ import java.util.UUID
 import units.Game
 
 trait GameState {
-  def createFight(playerName: String): Task[Game.FightState]
-  def updateFight(
+  def createBattle(playerName: String): Task[Game.BattleState]
+  def updateBattle(
       id: UUID,
-      newFight: Game.FightState
-  ): Task[Game.FightState]
-  def removeFight(id: UUID): Task[Unit]
-  def getFightState(id: UUID): Task[Option[Game.FightState]]
-  def getFights(): Task[List[Game.FightState]]
+      newBattle: Game.BattleState
+  ): Task[Game.BattleState]
+  def removeBattle(id: UUID): Task[Unit]
+  def getBattleState(id: UUID): Task[Option[Game.BattleState]]
+  def getBattles(): Task[List[Game.BattleState]]
 }
 
 object GameState {
-  def createFight(
+  def createBattle(
       playerName: String
-  ): ZIO[GameState, Throwable, Game.FightState] =
-    ZIO.serviceWithZIO[GameState](_.createFight(playerName))
+  ): ZIO[GameState, Throwable, Game.BattleState] =
+    ZIO.serviceWithZIO[GameState](_.createBattle(playerName))
 
-  def updateFight(
+  def updateBattle(
       id: UUID,
-      newFight: Game.FightState
-  ): ZIO[GameState, Throwable, Game.FightState] =
-    ZIO.serviceWithZIO[GameState](_.updateFight(id, newFight))
+      newBattle: Game.BattleState
+  ): ZIO[GameState, Throwable, Game.BattleState] =
+    ZIO.serviceWithZIO[GameState](_.updateBattle(id, newBattle))
 
-  def removeFight(
+  def removeBattle(
       id: UUID
   ): ZIO[GameState, Throwable, Unit] =
-    ZIO.serviceWithZIO[GameState](_.removeFight(id))
+    ZIO.serviceWithZIO[GameState](_.removeBattle(id))
 
-  def getFightState(
+  def getBattleState(
       id: UUID
-  ): ZIO[GameState, Throwable, Option[Game.FightState]] =
-    ZIO.serviceWithZIO[GameState](_.getFightState(id))
+  ): ZIO[GameState, Throwable, Option[Game.BattleState]] =
+    ZIO.serviceWithZIO[GameState](_.getBattleState(id))
 
-  def getFights(): ZIO[GameState, Throwable, List[Game.FightState]] =
-    ZIO.serviceWithZIO[GameState](_.getFights())
+  def getBattles(): ZIO[GameState, Throwable, List[Game.BattleState]] =
+    ZIO.serviceWithZIO[GameState](_.getBattles())
 }

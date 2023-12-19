@@ -8,34 +8,34 @@ import units.Game._
 import units.Game
 import units.Players
 
-case class InMemoryGameState(storage: Ref[Map[UUID, FightState]])
+case class InMemoryGameState(storage: Ref[Map[UUID, BattleState]])
     extends GameState {
-  // For now creates a fight with BotLvl1
-  def createFight(playerName: String): UIO[Game.FightState] = for {
+  // For now creates a Battle with BotLvl1
+  def createBattle(playerName: String): UIO[Game.BattleState] = for {
     gameId <- Random.nextUUID
-    newFight = FightState(
+    newBattle = BattleState(
       gameId,
       Players.DefaultPlayer(1, playerName),
       Players.BotLvl1
     )
-    _ <- storage.update(_.updated(gameId, newFight))
-  } yield newFight
+    _ <- storage.update(_.updated(gameId, newBattle))
+  } yield newBattle
 
-  def updateFight(
+  def updateBattle(
       id: UUID,
-      updatedFight: Game.FightState
-  ): UIO[Game.FightState] = for {
-    _ <- storage.update(_.updated(id, updatedFight))
-  } yield updatedFight
+      updatedBattle: Game.BattleState
+  ): UIO[Game.BattleState] = for {
+    _ <- storage.update(_.updated(id, updatedBattle))
+  } yield updatedBattle
 
-  def removeFight(id: UUID): UIO[Unit] = for {
+  def removeBattle(id: UUID): UIO[Unit] = for {
     _ <- storage.update(_.removed(id))
   } yield ()
 
-  def getFightState(id: UUID): UIO[Option[Game.FightState]] =
+  def getBattleState(id: UUID): UIO[Option[Game.BattleState]] =
     storage.get.map(_.get(id))
 
-  def getFights(): UIO[List[Game.FightState]] =
+  def getBattles(): UIO[List[Game.BattleState]] =
     storage.get.map(_.values.toList)
 }
 
@@ -43,7 +43,7 @@ object InMemoryGameState {
   def layer: ZLayer[Any, Nothing, InMemoryGameState] =
     ZLayer.fromZIO(
       Ref
-        .make(Map.empty[UUID, FightState])
+        .make(Map.empty[UUID, BattleState])
         .map(new InMemoryGameState(_))
     )
 }

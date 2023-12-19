@@ -20,10 +20,10 @@ object Layers {
     ZLayer.scoped(
       ZIO.acquireRelease(
         Ref
-          .make(Map.empty[UUID, Game.FightState])
+          .make(Map.empty[UUID, Game.BattleState])
           .map(new InMemoryGameState(_)) <* ZIO.debug(
           "New InMemoryState initialized"
         )
-      )(storage => storage.getFights.debug("InMemory storage"))
+      )(storage => storage.getBattles.debug("InMemory storage"))
     )
 }

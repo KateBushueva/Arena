@@ -10,14 +10,14 @@ import app.GameFlow._
 import state.GameState
 import java.util.UUID
 import units._
-import units.Game.FightState._
+import units.Game.BattleState._
 
 object GameFlowTest {
   val id = "b2c8ccb8-191a-4233-9b34-3e3111a4adaf"
   val uuid = UUID.fromString(id)
 
-  def mkFightStateResponse(damage1: Int, damage2: Int): Response = {
-    val response = Game.FightState(
+  def mkBattleStateResponse(damage1: Int, damage2: Int): Response = {
+    val response = Game.BattleState(
       uuid,
       Players.DefaultPlayer(1, "Melody"),
       Players.Bot(1),
@@ -32,24 +32,24 @@ object GameFlowTest {
       for {
         _ <- TestRandom.feedUUIDs(uuid)
         _ <- TestRandom.feedInts(4)
-        startResponse <- startNewFight("Melody")
-        fightState1 <- getFight(id)
+        startResponse <- startNewBattle("Melody")
+        battleState1 <- getBattle(id)
         hitResponse1 <- hit(id)
         _ <- hit(id)
         hitResponse2 <- hit(id)
-        fightState2 <- getFight(id)
-        deleteResponse <- deleteFight(id)
-        allFights <- getAllFights()
+        battleState2 <- getBattle(id)
+        deleteResponse <- deleteBattle(id)
+        allBattles <- getAllBattles()
 
       } yield assertTrue(
         startResponse == Response.text(id),
-        fightState1 == mkFightStateResponse(0, 0),
-        hitResponse1 == mkFightStateResponse(3, 4),
-        hitResponse2 == Response.text("The fight is over, Melody won"),
-        fightState2 == mkFightStateResponse(6, 8),
-        deleteResponse == Response.text(s"$id fight deleted successfully"),
-        allFights == Response.json(
-          Map.empty[UUID, Game.FightState].map(_.toJson).toJson
+        battleState1 == mkBattleStateResponse(0, 0),
+        hitResponse1 == mkBattleStateResponse(3, 4),
+        hitResponse2 == Response.text("The battle is over, Melody won"),
+        battleState2 == mkBattleStateResponse(6, 8),
+        deleteResponse == Response.text(s"$id battle deleted successfully"),
+        allBattles == Response.json(
+          Map.empty[UUID, Game.BattleState].map(_.toJson).toJson
         )
       )
     }
@@ -64,7 +64,7 @@ object GameFlowTest {
 
   val deleteTestFail = test("Delete test. Fail case - not found response") {
     for {
-      response <- deleteFight(id)
+      response <- deleteBattle(id)
     } yield assertTrue(
       response == Response.status(Status.NotFound)
     )

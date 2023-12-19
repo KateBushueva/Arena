@@ -15,11 +15,11 @@ To run flow tests run `sbt test` from the project root.
 
 The current version supports the following endpoints:
  - `/start/{providedName}` - the endpoint creates a new battle for a first-level player (whose name must be provided by client) and a first-level bit. The response contains the battle id. For example, you may type `http://localhost:8080/start/Melody` in your browser to create a battle between first-level player named "Melody" and a first-level bot. You will get the battle id in response (for example `a105b86a-c0b5-4444-82b8-cc8451beeb15`)
- - `/hit/{battleId}` - the endpoint involves causing damage to all participants of the battle (which id must be provided). The response may be either a new battle state or a message about a winner. For example, the request may be `http://localhost:8080/hit/a105b86a-c0b5-4444-82b8-cc8451beeb15` and the response may be `The fight is over, Melody won`. 
+ - `/hit/{battleId}` - the endpoint involves causing damage to all participants of the battle (which id must be provided). The response may be either a new battle state or a message about a winner. For example, the request may be `http://localhost:8080/hit/a105b86a-c0b5-4444-82b8-cc8451beeb15` and the response may be `The battle is over, Melody won`. 
  If you pass a non-existent ID to the endpoint, the server will return еру 404 error.
- - `/delete/{battleId}` - the endpoint removes the battle with provided id from the game state. For example, the request is `http://localhost:8080/delete/a105b86a-c0b5-4444-82b8-cc8451beeb15` and the response will be `a105b86a-c0b5-4444-82b8-cc8451beeb15 fight deleted successfully`. If you pass a non-existent ID to the endpoint, the server will return еру 404 error.
+ - `/delete/{battleId}` - the endpoint removes the battle with provided id from the game state. For example, the request is `http://localhost:8080/delete/a105b86a-c0b5-4444-82b8-cc8451beeb15` and the response will be `a105b86a-c0b5-4444-82b8-cc8451beeb15 battle deleted successfully`. If you pass a non-existent ID to the endpoint, the server will return еру 404 error.
  
- There are also two additional getter-like endpoints that give information about battle state and game state respectively: `/getFight/{battleId}` and `/allFights` 
+ There are also two additional getter-like endpoints that give information about battle state and game state respectively: `/getBattle/{battleId}` and `/allBattles` 
 
 ## Roadmap
 
@@ -27,9 +27,9 @@ The current version supports the following endpoints:
 1. The ability to create a battle for a first level player with a bot by passing the character name
 2. GameState as InMemoryGameState with all the active battles
 3. Implementation of the following endpoints:
-  - allFights()
+  - allBattles()
   - start(name: String)
-  - getFight(battleId: UUID)
+  - getBattle(battleId: UUID)
   - hit(battleId: UUID)
   - delete(battleId: UUID)
 
