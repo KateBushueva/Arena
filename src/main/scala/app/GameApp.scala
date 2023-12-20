@@ -8,12 +8,13 @@ import java.util.UUID
 
 import state.GameState
 import units.Game.BattleState._
+import units.Players
 
 object GameApp {
   def apply(): Http[GameState, Throwable, Request, Response] =
     Http.collectZIO[Request] {
-      case Method.GET -> Root / "allBattles"   => GameFlow.getAllBattles()
-      case Method.GET -> Root / "start" / name => GameFlow.startNewBattle(name)
+      case Method.GET -> Root / "allBattles" => GameFlow.getAllBattles()
+      // case Method.GET -> Root / "start" / name => GameFlow.startNewBattle(name)
       case Method.GET -> Root / "getBattle" / id => GameFlow.getBattle(id)
       case Method.GET -> Root / "hit" / id       => GameFlow.hit(id)
       case Method.GET -> Root / "delete" / id    => GameFlow.deleteBattle(id)
@@ -26,9 +27,11 @@ object GameFlow {
       .getBattles()
       .map(battles => Response.json(battles.map(_.toJson).toJson))
 
-  def startNewBattle(name: String): ZIO[GameState, Throwable, Response] =
+  def startNewBattle(
+      player: Players.Player
+  ): ZIO[GameState, Throwable, Response] =
     GameState
-      .createBattle(name)
+      .createBattle(player)
       .map(battle => Response.text(battle.gameId.toString))
 
   def getBattle(id: String): ZIO[GameState, Throwable, Response] = {

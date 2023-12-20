@@ -5,9 +5,10 @@ import zio._
 import java.util.UUID
 
 import units.Game
+import units.Players
 
 trait GameState {
-  def createBattle(playerName: String): Task[Game.BattleState]
+  def createBattle(player: Players.Player): Task[Game.BattleState]
   def updateBattle(
       id: UUID,
       newBattle: Game.BattleState
@@ -19,9 +20,9 @@ trait GameState {
 
 object GameState {
   def createBattle(
-      playerName: String
+      player: Players.Player
   ): ZIO[GameState, Throwable, Game.BattleState] =
-    ZIO.serviceWithZIO[GameState](_.createBattle(playerName))
+    ZIO.serviceWithZIO[GameState](_.createBattle(player))
 
   def updateBattle(
       id: UUID,

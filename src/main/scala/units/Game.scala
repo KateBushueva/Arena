@@ -17,7 +17,7 @@ object Game {
       damageReceived2: Int
   ) {
     def addDamage(player: Player, damage: Int): BattleState = player match {
-      case _ if player == player1 => {
+      case _ if player == player1 =>
         BattleState(
           gameId,
           player1,
@@ -25,8 +25,7 @@ object Game {
           damageReceived1 + damage,
           damageReceived2
         )
-      }
-      case _ => {
+      case _ =>
         BattleState(
           gameId,
           player1,
@@ -34,7 +33,6 @@ object Game {
           damageReceived1,
           damageReceived2 + damage
         )
-      }
     }
 
     def getWinner(): Option[Player] = (

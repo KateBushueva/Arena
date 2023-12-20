@@ -16,11 +16,16 @@ object GameFlowTest {
   val id = "b2c8ccb8-191a-4233-9b34-3e3111a4adaf"
   val uuid = UUID.fromString(id)
 
+  val player = Players.CustomPlayer(
+    UUID.fromString("b2c8ccb8-191a-4233-9b34-3e3111a4bbbb"),
+    "Melody"
+  )
+
   def mkBattleStateResponse(damage1: Int, damage2: Int): Response = {
     val response = Game.BattleState(
       uuid,
-      Players.DefaultPlayer(1, "Melody"),
-      Players.Bot(1),
+      player,
+      Players.BotLvl1,
       damage1,
       damage2
     )
@@ -32,7 +37,7 @@ object GameFlowTest {
       for {
         _ <- TestRandom.feedUUIDs(uuid)
         _ <- TestRandom.feedInts(4)
-        startResponse <- startNewBattle("Melody")
+        startResponse <- startNewBattle(player)
         battleState1 <- getBattle(id)
         hitResponse1 <- hit(id)
         _ <- hit(id)
