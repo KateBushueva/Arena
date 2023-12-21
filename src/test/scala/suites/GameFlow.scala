@@ -17,8 +17,11 @@ object GameFlowTest {
   val uuid = UUID.fromString(id)
 
   val player = Players.CustomPlayer(
-    UUID.fromString("b2c8ccb8-191a-4233-9b34-3e3111a4bbbb"),
-    "Melody"
+    Players.PlayerData(
+      UUID.fromString("b2c8ccb8-191a-4233-9b34-3e3111a4bbbb"),
+      "Melody",
+      0
+    )
   )
 
   def mkBattleStateResponse(damage1: Int, damage2: Int): Response = {
@@ -74,5 +77,4 @@ object GameFlowTest {
       response == Response.status(Status.NotFound)
     )
   }
-
 }

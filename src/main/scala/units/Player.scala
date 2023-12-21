@@ -32,6 +32,8 @@ object Players {
     } yield result
   }
 
+  final case class PlayerData(id: UUID, name: String, experience: Int)
+
   sealed trait Player {
     val name: String
     val level: Level
@@ -39,23 +41,17 @@ object Players {
     def hit(): UIO[Int]
   }
 
-  case class CustomPlayer(uuid: UUID, givenName: String, exp: Int)
-      extends Player {
-    val id = uuid
-    val name = givenName
-    val experience = exp
-    val level = Level(Experience(exp))
+  case class CustomPlayer(playerData: PlayerData) extends Player {
+    val id = playerData.id
+    val name = playerData.name
+    val experience = playerData.experience
+    val level = Level(Experience(experience))
     val hitPoints: Int = level.hitPoints
 
     def hit(): UIO[Int] = level.hit
 
     def addExperience(additionalExp: Int): CustomPlayer =
-      CustomPlayer(uuid, givenName, experience + additionalExp)
-  }
-
-  object CustomPlayer {
-    def apply(uuid: UUID, givenName: String): CustomPlayer =
-      new CustomPlayer(uuid, givenName, 0)
+      CustomPlayer(PlayerData(id, name, experience + additionalExp))
   }
 
   sealed case class Bot(lev: Int) extends Player {
@@ -64,6 +60,11 @@ object Players {
     val hitPoints: Int = level.hitPoints
     def hit(): UIO[Int] = ZIO.succeed(level.attack / 2)
   }
+
+  implicit val playerDataEncoder: JsonEncoder[PlayerData] =
+    DeriveJsonEncoder.gen[PlayerData]
+  implicit val playerDataDecoder: JsonDecoder[PlayerData] =
+    DeriveJsonDecoder.gen[PlayerData]
 
   implicit val playerEncoder: JsonEncoder[Player] =
     DeriveJsonEncoder.gen[Player]
