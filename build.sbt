@@ -14,4 +14,10 @@ libraryDependencies ++= Seq(
   "dev.zio" %% "zio-test-sbt" % "2.0.20" % Test,
   "dev.zio" %% "zio-test-magnolia" % "2.0.20" % Test
 )
+
+libraryDependencies ++= Seq(
+  "org.postgresql" % "postgresql" % "42.2.8",
+  "io.getquill" %% "quill-jdbc-zio" % "4.8.0"
+)
+
 testFrameworks += new TestFramework("zio.test.sbt.ZTestFramework")

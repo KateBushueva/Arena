@@ -6,3 +6,4 @@ project/target/
 project/metals.sbt
 target/
 *.worksheet.sc
+src/main/resources/application.conf
