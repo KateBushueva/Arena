@@ -15,6 +15,7 @@ trait PlayersRepo {
   ): ZIO[PlayersRepo, Throwable, PlayerData]
   def deletePlayer(id: UUID): ZIO[PlayersRepo, Throwable, PlayerData]
   def getAllPlayers(): ZIO[PlayersRepo, Throwable, List[PlayerData]]
+  def getOnePlayer(id: UUID): ZIO[PlayersRepo, Throwable, Option[PlayerData]]
 }
 
 object PlayersRepo {
@@ -37,4 +38,7 @@ object PlayersRepo {
 
   def getAllPlayers(): ZIO[PlayersRepo, Throwable, List[PlayerData]] =
     ZIO.serviceWithZIO[PlayersRepo](_.getAllPlayers())
+
+  def getOnePlayer(id: UUID): ZIO[PlayersRepo, Throwable, Option[PlayerData]] =
+    ZIO.serviceWithZIO[PlayersRepo](_.getOnePlayer(id))
 }

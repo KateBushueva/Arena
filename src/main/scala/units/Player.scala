@@ -37,27 +37,18 @@ object Players {
   sealed trait Player {
     val name: String
     val level: Level
-    val hitPoints: Int
     def hit(): UIO[Int]
   }
 
   case class CustomPlayer(playerData: PlayerData) extends Player {
-    val id = playerData.id
     val name = playerData.name
-    val experience = playerData.experience
-    val level = Level(Experience(experience))
-    val hitPoints: Int = level.hitPoints
-
+    val level = Level(Experience(playerData.experience))
     def hit(): UIO[Int] = level.hit
-
-    def addExperience(additionalExp: Int): CustomPlayer =
-      CustomPlayer(PlayerData(id, name, experience + additionalExp))
   }
 
   sealed case class Bot(lev: Int) extends Player {
     val level = Level(Lev(lev))
     val name: String = s"BotLvl${level.level}"
-    val hitPoints: Int = level.hitPoints
     def hit(): UIO[Int] = ZIO.succeed(level.attack / 2)
   }
 

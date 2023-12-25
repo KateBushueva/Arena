@@ -20,9 +20,6 @@ object PlayerApp {
         PlayerFlow.getPlayer(id)
       case Method.GET -> Root / "player" / "deletePlayer" / id =>
         PlayerFlow.deletePlayer(id)
-      // the updatePlayer will be removed from the list of accessible endpoints
-      case Method.GET -> root / "player" / "updatePlayer" / id / additionalExp =>
-        PlayerFlow.updatePlayer(id, additionalExp.toInt)
     }
 }
 
@@ -51,15 +48,5 @@ object PlayerFlow {
   def deletePlayer(id: String): ZIO[PlayersRepo, Throwable, Response] = {
     val uuid = UUID.fromString(id)
     PlayersRepo.deletePlayer(uuid).map(player => Response.json(player.toJson))
-  }
-
-  def updatePlayer(
-      id: String,
-      additionalExp: Int
-  ): ZIO[PlayersRepo, Throwable, Response] = {
-    val uuid = UUID.fromString(id)
-    PlayersRepo
-      .updatePlayer(uuid, additionalExp)
-      .map(player => Response.json(player.toJson))
   }
 }

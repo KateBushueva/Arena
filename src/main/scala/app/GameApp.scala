@@ -7,17 +7,23 @@ import zio.json._
 import java.util.UUID
 
 import state.GameState
+import state.PlayersRepo
 import units.Game.BattleState._
 import units.Players
+import units.Players.Bot
+import units.Players.CustomPlayer
 
 object GameApp {
-  def apply(): Http[GameState, Throwable, Request, Response] =
+  def apply(): Http[GameState with PlayersRepo, Throwable, Request, Response] =
     Http.collectZIO[Request] {
       case Method.GET -> Root / "allBattles" => GameFlow.getAllBattles()
-      // case Method.GET -> Root / "start" / name => GameFlow.startNewBattle(name)
-      case Method.GET -> Root / "getBattle" / id => GameFlow.getBattle(id)
-      case Method.GET -> Root / "hit" / id       => GameFlow.hit(id)
-      case Method.GET -> Root / "delete" / id    => GameFlow.deleteBattle(id)
+      case Method.GET -> Root / "start" / playerId =>
+        GameFlow.startNewBattle(playerId)
+      case Method.GET -> Root / "getBattle" / battleId =>
+        GameFlow.getBattle(battleId)
+      case Method.GET -> Root / "hit" / battleId => GameFlow.hit(battleId)
+      case Method.GET -> Root / "completeBattle" / battleId =>
+        GameFlow.completeBattle(battleId)
     }
 }
 
@@ -28,11 +34,19 @@ object GameFlow {
       .map(battles => Response.json(battles.map(_.toJson).toJson))
 
   def startNewBattle(
-      player: Players.Player
-  ): ZIO[GameState, Throwable, Response] =
-    GameState
-      .createBattle(player)
-      .map(battle => Response.text(battle.gameId.toString))
+      id: String
+  ): ZIO[GameState with PlayersRepo, Throwable, Response] = {
+    val uuid = UUID.fromString(id)
+    for {
+      resp <- PlayersRepo.getOnePlayer(uuid).flatMap {
+        case Some(playerData) =>
+          GameState
+            .createBattle(Players.CustomPlayer(playerData))
+            .map(battle => Response.text(battle.gameId.toString))
+        case None => ZIO.succeed(Response.status(Status.NotFound))
+      }
+    } yield resp
+  }
 
   def getBattle(id: String): ZIO[GameState, Throwable, Response] = {
     val uuid = UUID.fromString(id)
@@ -44,16 +58,44 @@ object GameFlow {
       }
   }
 
-  def deleteBattle(id: String): ZIO[GameState, Throwable, Response] = {
+  def completeBattle(
+      id: String
+  ): ZIO[GameState with PlayersRepo, Throwable, Response] = {
     val uuid = UUID.fromString(id)
     GameState
       .getBattleState(uuid)
       .flatMap {
         case None => ZIO.succeed(Response.status(Status.NotFound))
-        case Some(_) =>
-          GameState
-            .removeBattle(uuid)
-            .map(_ => Response.text(s"$id battle deleted successfully"))
+        case Some(battleState) =>
+          battleState.getWinner() match {
+            case None =>
+              GameState
+                .removeBattle(uuid)
+                .map(_ => Response.text(s"$id battle removed successfully"))
+            case Some(player) =>
+              player match {
+                case Bot(_) =>
+                  GameState
+                    .removeBattle(uuid)
+                    .map(_ =>
+                      Response.text(s"The battle is over, ${player.name} won")
+                    )
+                case CustomPlayer(playerData) =>
+                  for {
+                    updated <- PlayersRepo.updatePlayer(
+                      playerData.id,
+                      battleState.experienceReceived
+                    )
+                    resp <- GameState
+                      .removeBattle(uuid)
+                      .map(_ =>
+                        Response.text(
+                          s"The battle is over, ${updated.name} won. ${battleState.experienceReceived} experience received"
+                        )
+                      )
+                  } yield resp
+              }
+          }
       }
   }
 

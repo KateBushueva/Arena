@@ -36,12 +36,20 @@ object Game {
     }
 
     def getWinner(): Option[Player] = (
-      player1.hitPoints - damageReceived1,
-      player2.hitPoints - damageReceived2
+      player1.level.hitPoints - damageReceived1,
+      player2.level.hitPoints - damageReceived2
     ) match {
       case (res1, _) if res1 <= 0 => Some(player2)
       case (_, res2) if res2 <= 0 => Some(player1)
       case _                      => None
+    }
+
+    def experienceReceived(): Int = {
+      getWinner() match {
+        case None                              => 0
+        case Some(player) if player == player1 => player2.level.hitPoints
+        case _                                 => player1.level.hitPoints
+      }
     }
   }
 

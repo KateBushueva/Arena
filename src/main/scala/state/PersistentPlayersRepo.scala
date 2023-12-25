@@ -54,6 +54,14 @@ final case class PersistentPlayersRepo(src: DataSource) extends PlayersRepo {
     }
       .provide(ZLayer.succeed(src))
 
+  def getOnePlayer(
+      id: UUID
+  ): ZIO[PlayersRepo, SQLException, Option[PlayerData]] =
+    run {
+      query[PlayerData].filter(p => p.id == lift(id))
+    }
+      .map(_.headOption)
+      .provide(ZLayer.succeed(src))
 }
 
 object PersistentPlayersRepoLayer {
