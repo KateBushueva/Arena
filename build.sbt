@@ -20,4 +20,6 @@ libraryDependencies ++= Seq(
   "io.getquill" %% "quill-jdbc-zio" % "4.8.0"
 )
 
+libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.1.3" % Runtime
+
 testFrameworks += new TestFramework("zio.test.sbt.ZTestFramework")
