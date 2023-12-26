@@ -11,22 +11,19 @@ import state.GameState
 import java.util.UUID
 import units._
 import units.Game.BattleState._
+import app.PlayerFlow
 
 object GameFlowTest {
-  val id = "b2c8ccb8-191a-4233-9b34-3e3111a4adaf"
-  val uuid = UUID.fromString(id)
+  val battleId = "b2c8ccb8-191a-4233-9b34-3e3111a4adaf"
+  val playerId = "b2c81118-191a-4233-9b34-3e3111a4adaf"
+  val gameUuid = UUID.fromString(battleId)
+  val playerUuid = UUID.fromString(playerId)
 
-  val player = Players.CustomPlayer(
-    Players.PlayerData(
-      UUID.fromString("b2c8ccb8-191a-4233-9b34-3e3111a4bbbb"),
-      "Melody",
-      0
-    )
-  )
+  val player = Players.CustomPlayer(Players.PlayerData(playerUuid, "Melody", 0))
 
   def mkBattleStateResponse(damage1: Int, damage2: Int): Response = {
     val response = Game.BattleState(
-      uuid,
+      gameUuid,
       player,
       Players.BotLvl1,
       damage1,
@@ -35,36 +32,47 @@ object GameFlowTest {
     Response.json(response.toJson)
   }
 
+  def mkPlayerData(exp: Int): Players.PlayerData =
+    Players.PlayerData(playerUuid, "Melody", exp)
+
   val gameFlowSuccess =
     test("Should successfully run start, hit and delete endpoints") {
       for {
-        _ <- TestRandom.feedUUIDs(uuid)
+        _ <- TestRandom.feedUUIDs(playerUuid, gameUuid)
         _ <- TestRandom.feedInts(4)
-        startResponse <- startNewBattle(player)
-        battleState1 <- getBattle(id)
-        hitResponse1 <- hit(id)
-        _ <- hit(id)
-        hitResponse2 <- hit(id)
-        battleState2 <- getBattle(id)
-        deleteResponse <- deleteBattle(id)
+        createPlayerResponse <- PlayerFlow.createPlayer("Melody")
+        startResponse <- startNewBattle(playerId)
+        battleState1 <- getBattle(battleId)
+        hitResponse1 <- hit(battleId)
+        _ <- hit(battleId)
+        hitResponse2 <- hit(battleId)
+        battleState2 <- getBattle(battleId)
+        completeResponse <- completeBattle(battleId)
         allBattles <- getAllBattles()
+        updatedPlayer <- PlayerFlow.getPlayer(playerId)
 
       } yield assertTrue(
-        startResponse == Response.text(id),
+        createPlayerResponse == Response.json(mkPlayerData(0).toJson),
+        startResponse == Response.text(battleId),
         battleState1 == mkBattleStateResponse(0, 0),
         hitResponse1 == mkBattleStateResponse(3, 4),
         hitResponse2 == Response.text("The battle is over, Melody won"),
         battleState2 == mkBattleStateResponse(6, 8),
-        deleteResponse == Response.text(s"$id battle deleted successfully"),
+        completeResponse == Response.text(
+          s"The battle is over, Melody won. 8 experience received"
+        ),
         allBattles == Response.json(
           Map.empty[UUID, Game.BattleState].map(_.toJson).toJson
+        ),
+        updatedPlayer == Response.json(
+          Option(mkPlayerData(8)).map(_.toJson).toJson
         )
       )
     }
 
   val hitTestFail = test("Hit test. Fail case - not found response") {
     for {
-      response <- hit(id)
+      response <- hit(battleId)
     } yield assertTrue(
       response == Response.status(Status.NotFound)
     )
@@ -72,7 +80,7 @@ object GameFlowTest {
 
   val deleteTestFail = test("Delete test. Fail case - not found response") {
     for {
-      response <- deleteBattle(id)
+      response <- completeBattle(battleId)
     } yield assertTrue(
       response == Response.status(Status.NotFound)
     )

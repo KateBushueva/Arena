@@ -39,9 +39,8 @@ object PlayerFlow {
   def getPlayer(id: String): ZIO[PlayersRepo, Throwable, Response] = {
     val uuid = UUID.fromString(id)
     PlayersRepo
-      .getAllPlayers()
-      .map { players =>
-        val mPlayer = players.find(player => player.id == uuid)
+      .getOnePlayer(uuid)
+      .map { mPlayer =>
         Response.json(mPlayer.map(_.toJson).toJson)
       }
   }

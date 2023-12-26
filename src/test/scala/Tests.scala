@@ -5,6 +5,8 @@ import suites._
 import state.InMemoryGameState
 import java.util.UUID
 import units.Game
+import instances.InMemoryPlayerStorage
+import units.Players
 
 object TestSuites extends ZIOSpecDefault {
   def spec: Spec[TestEnvironment with Scope, Any] =
@@ -12,18 +14,28 @@ object TestSuites extends ZIOSpecDefault {
       GameFlowTest.gameFlowSuccess,
       GameFlowTest.hitTestFail,
       GameFlowTest.deleteTestFail
-    ).provideShared(Layers.inMemoryState)
+    ).provideShared(Layers.battleStorage ++ Layers.playerStorage)
 }
 
 object Layers {
-  val inMemoryState =
+  val battleStorage =
     ZLayer.scoped(
       ZIO.acquireRelease(
         Ref
           .make(Map.empty[UUID, Game.BattleState])
           .map(new InMemoryGameState(_)) <* ZIO.debug(
-          "New InMemoryState initialized"
+          "New InMemory battle storage initialized"
         )
-      )(storage => storage.getBattles.debug("InMemory storage"))
+      )(storage => storage.getBattles.debug("InMemory battle storage"))
+    )
+  val playerStorage =
+    ZLayer.scoped(
+      ZIO.acquireRelease(
+        Ref
+          .make(Map.empty[UUID, Players.PlayerData])
+          .map(new InMemoryPlayerStorage(_)) <* ZIO.debug(
+          "New InMemory player storage initialized"
+        )
+      )(storage => storage.getAllPlayers.debug("InMemory player storage"))
     )
 }
