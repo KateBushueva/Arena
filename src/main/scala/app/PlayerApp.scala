@@ -40,8 +40,10 @@ object PlayerFlow {
     val uuid = UUID.fromString(id)
     PlayersRepo
       .getOnePlayer(uuid)
-      .map { mPlayer =>
-        Response.json(mPlayer.map(_.toJson).toJson)
+      .map {
+        case Some(player) =>
+          Response.json(player.toJson)
+        case None => Response.status(Status.NotFound)
       }
   }
   def deletePlayer(id: String): ZIO[PlayersRepo, Throwable, Response] = {

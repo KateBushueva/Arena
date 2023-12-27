@@ -12,8 +12,8 @@ trait PlayersRepo {
   def updatePlayer(
       id: UUID,
       additionalExp: Int
-  ): ZIO[PlayersRepo, Throwable, PlayerData]
-  def deletePlayer(id: UUID): ZIO[PlayersRepo, Throwable, PlayerData]
+  ): ZIO[PlayersRepo, Throwable, Option[PlayerData]]
+  def deletePlayer(id: UUID): ZIO[PlayersRepo, Throwable, Option[PlayerData]]
   def getAllPlayers(): ZIO[PlayersRepo, Throwable, List[PlayerData]]
   def getOnePlayer(id: UUID): ZIO[PlayersRepo, Throwable, Option[PlayerData]]
 }
@@ -28,12 +28,12 @@ object PlayersRepo {
   def updatePlayer(
       id: UUID,
       additionalExp: Int
-  ): ZIO[PlayersRepo, Throwable, PlayerData] =
+  ): ZIO[PlayersRepo, Throwable, Option[PlayerData]] =
     ZIO.serviceWithZIO[PlayersRepo](_.updatePlayer(id, additionalExp))
 
   def deletePlayer(
       id: UUID
-  ): ZIO[PlayersRepo, Throwable, PlayerData] =
+  ): ZIO[PlayersRepo, Throwable, Option[PlayerData]] =
     ZIO.serviceWithZIO[PlayersRepo](_.deletePlayer(id))
 
   def getAllPlayers(): ZIO[PlayersRepo, Throwable, List[PlayerData]] =

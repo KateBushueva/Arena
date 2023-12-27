@@ -22,20 +22,26 @@ case class InMemoryPlayerStorage(storage: Ref[Map[UUID, Players.PlayerData]])
   def updatePlayer(
       id: UUID,
       additionalExp: Int
-  ): UIO[Players.PlayerData] = for {
-    playerData <- storage.get.map(_.apply(id))
-    updatedData = Players.PlayerData(
-      id,
-      playerData.name,
-      playerData.experience + additionalExp
+  ): UIO[Option[Players.PlayerData]] = for {
+    mPlayerData <- storage.get.map(_.get(id))
+    mUpdatedData = mPlayerData.map(playerData =>
+      Players.PlayerData(
+        id,
+        playerData.name,
+        playerData.experience + additionalExp
+      )
     )
-    _ <- storage.update(_.updated(id, updatedData))
-  } yield updatedData
+    _ <- mUpdatedData match {
+      case Some(updatedData) =>
+        storage.update(_.updated(id, updatedData))
+      case _ => ZIO.succeed(())
+    }
+  } yield mUpdatedData
 
-  def deletePlayer(id: UUID): UIO[Players.PlayerData] = for {
-    playerData <- storage.get.map(_.apply(id))
+  def deletePlayer(id: UUID): UIO[Option[Players.PlayerData]] = for {
+    mPlayerData <- storage.get.map(_.get(id))
     _ <- storage.update(_.removed(id))
-  } yield playerData
+  } yield mPlayerData
 
   def getAllPlayers(): UIO[List[Players.PlayerData]] =
     storage.get.map(_.values.toList)

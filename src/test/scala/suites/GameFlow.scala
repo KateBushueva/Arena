@@ -65,7 +65,7 @@ object GameFlowTest {
           Map.empty[UUID, Game.BattleState].map(_.toJson).toJson
         ),
         updatedPlayer == Response.json(
-          Option(mkPlayerData(8)).map(_.toJson).toJson
+          mkPlayerData(8).toJson
         )
       )
     }

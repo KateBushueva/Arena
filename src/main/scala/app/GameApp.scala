@@ -82,17 +82,23 @@ object GameFlow {
                     )
                 case CustomPlayer(playerData) =>
                   for {
-                    updated <- PlayersRepo.updatePlayer(
+                    mUpdated <- PlayersRepo.updatePlayer(
                       playerData.id,
                       battleState.experienceReceived
                     )
-                    resp <- GameState
-                      .removeBattle(uuid)
-                      .map(_ =>
-                        Response.text(
-                          s"The battle is over, ${updated.name} won. ${battleState.experienceReceived} experience received"
-                        )
-                      )
+                    resp <- mUpdated match {
+                      case Some(updated) =>
+                        GameState
+                          .removeBattle(uuid)
+                          .map(_ =>
+                            Response.text(
+                              s"The battle is over, ${updated.name} won. ${battleState.experienceReceived} experience received"
+                            )
+                          )
+                      case _ =>
+                        ZIO.succeed(Response.status(Status.InternalServerError))
+                    }
+
                   } yield resp
               }
           }

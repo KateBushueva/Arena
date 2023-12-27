@@ -31,22 +31,25 @@ final case class PersistentPlayersRepo(src: DataSource) extends PlayersRepo {
   def updatePlayer(
       id: UUID,
       additionalExp: Int
-  ): ZIO[PlayersRepo, SQLException, PlayerData] =
+  ): ZIO[PlayersRepo, SQLException, Option[PlayerData]] =
     run {
       query[PlayerData]
         .filter(p => p.id == lift(id))
         .update(player =>
           player.experience -> (player.experience + lift(additionalExp))
         )
-        .returning(a => a)
-    }.provide(ZLayer.succeed(src))
+        .returningMany(a => a)
+    }.map(_.headOption).provide(ZLayer.succeed(src))
 
   def deletePlayer(
       id: UUID
-  ): ZIO[PlayersRepo, SQLException, PlayerData] =
+  ): ZIO[PlayersRepo, SQLException, Option[PlayerData]] =
     run {
-      query[PlayerData].filter(p => p.id == lift(id)).delete.returning(a => a)
-    }.provide(ZLayer.succeed(src))
+      query[PlayerData]
+        .filter(p => p.id == lift(id))
+        .delete
+        .returningMany(a => a)
+    }.map(_.headOption).provide(ZLayer.succeed(src))
 
   def getAllPlayers(): ZIO[PlayersRepo, SQLException, List[PlayerData]] =
     run {

@@ -10,11 +10,22 @@ import units.Players
 
 object TestSuites extends ZIOSpecDefault {
   def spec: Spec[TestEnvironment with Scope, Any] =
-    suite("Game tests")(
-      GameFlowTest.gameFlowSuccess,
-      GameFlowTest.hitTestFail,
-      GameFlowTest.deleteTestFail
-    ).provideShared(Layers.battleStorage ++ Layers.playerStorage)
+    suite("Test cases")(
+      suite("GameFlow success tests")(
+        GameFlowTest.gameFlowSuccess
+      ).provideShared(Layers.battleStorage ++ Layers.playerStorage),
+      suite("GameFlow fail tests")(
+        GameFlowTest.hitTestFail,
+        GameFlowTest.deleteTestFail
+      ).provideShared(Layers.battleStorage ++ Layers.playerStorage),
+      suite("PlayerFlow success tests")(
+        PlayerFlowTest.createPlayerSuccess
+      ).provideShared(Layers.playerStorage),
+      suite("PlayerFlow fail tests")(
+        PlayerFlowTest.updatePlayerFailTest,
+        PlayerFlowTest.deletePlayerFailTest
+      ).provideShared(Layers.playerStorage)
+    )
 }
 
 object Layers {
