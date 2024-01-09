@@ -47,8 +47,8 @@ object Game {
     def experienceReceived(): Int = {
       getWinner() match {
         case None                              => 0
-        case Some(player) if player == player1 => player2.level.hitPoints
-        case _                                 => player1.level.hitPoints
+        case Some(player) if player == player1 => player2.level.reward
+        case _                                 => player1.level.reward
       }
     }
   }

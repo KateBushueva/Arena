@@ -24,7 +24,11 @@ object TestSuites extends ZIOSpecDefault {
       suite("PlayerFlow fail tests")(
         PlayerFlowTest.updatePlayerFailTest,
         PlayerFlowTest.deletePlayerFailTest
-      ).provideShared(Layers.playerStorage)
+      ).provideShared(Layers.playerStorage),
+      suite("Unit Tests")(
+        GameUnitTests.playerCreation,
+        GameUnitTests.botSelection
+      )
     )
 }
 
