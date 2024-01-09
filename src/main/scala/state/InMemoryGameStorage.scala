@@ -13,10 +13,11 @@ case class InMemoryGameState(storage: Ref[Map[UUID, BattleState]])
   // For now creates a Battle with BotLvl1
   def createBattle(player: Players.Player): UIO[Game.BattleState] = for {
     gameId <- Random.nextUUID
+    bot = Players.selectBot(player.level.level)
     newBattle = BattleState(
       gameId,
       player,
-      Players.BotLvl1
+      bot
     )
     _ <- storage.update(_.updated(gameId, newBattle))
   } yield newBattle

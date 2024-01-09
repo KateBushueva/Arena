@@ -39,9 +39,9 @@ object Game {
       player1.level.hitPoints - damageReceived1,
       player2.level.hitPoints - damageReceived2
     ) match {
-      case (res1, _) if res1 <= 0 => Some(player2)
-      case (_, res2) if res2 <= 0 => Some(player1)
-      case _                      => None
+      case (res1, res2) if res1 <= 0 || res2 <= 0 =>
+        if (res1 < res2) Some(player2) else Some(player1)
+      case _ => None
     }
 
     def experienceReceived(): Int = {

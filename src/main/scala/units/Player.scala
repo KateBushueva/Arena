@@ -70,4 +70,15 @@ object Players {
   object BotLvl6 extends Bot(6)
   object BotLvl7 extends Bot(7)
   object BotLvl8 extends Bot(8)
+
+  def selectBot(level: Int): Player = level match {
+    case 1 => BotLvl1
+    case 2 => BotLvl2
+    case 3 => BotLvl3
+    case 4 => BotLvl4
+    case 5 => BotLvl5
+    case 6 => BotLvl6
+    case 7 => BotLvl7
+    case _ => BotLvl8
+  }
 }
