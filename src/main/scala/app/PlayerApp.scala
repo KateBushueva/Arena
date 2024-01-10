@@ -7,23 +7,23 @@ import zio.json._
 import java.util.UUID
 
 import state.PlayersRepo
-import units.Players
+import units.Characters
 
-object PlayerApp {
+object CharacterApp {
   def apply(): Http[PlayersRepo, Throwable, Request, Response] =
     Http.collectZIO[Request] {
-      case Method.GET -> Root / "player" / "allPlayers" =>
-        PlayerFlow.getAllPlayers()
-      case Method.GET -> Root / "player" / "createPlayer" / name =>
-        PlayerFlow.createPlayer(name)
-      case Method.GET -> Root / "player" / "getPlayer" / id =>
-        PlayerFlow.getPlayer(id)
-      case Method.GET -> Root / "player" / "deletePlayer" / id =>
-        PlayerFlow.deletePlayer(id)
+      case Method.GET -> Root / "character" / "allCharacters" =>
+        CharacterFlow.getAllPlayers()
+      case Method.GET -> Root / "character" / "newCharacter" / name =>
+        CharacterFlow.createPlayer(name)
+      case Method.GET -> Root / "character" / "getCharacter" / id =>
+        CharacterFlow.getPlayer(id)
+      case Method.GET -> Root / "character" / "deleteCharacter" / id =>
+        CharacterFlow.deletePlayer(id)
     }
 }
 
-object PlayerFlow {
+object CharacterFlow {
   def getAllPlayers(): ZIO[PlayersRepo, Throwable, Response] =
     PlayersRepo
       .getAllPlayers()
@@ -33,7 +33,7 @@ object PlayerFlow {
     uuid <- Random.nextUUID
     resp <- PlayersRepo
       .addPlayer(name, uuid)
-      .map(playerData => Response.json(playerData.toJson))
+      .map(characterData => Response.json(characterData.toJson))
   } yield resp
 
   def getPlayer(id: String): ZIO[PlayersRepo, Throwable, Response] = {

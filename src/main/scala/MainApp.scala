@@ -2,14 +2,14 @@ import zio._
 import zio.http._
 
 import app._
-import state.InMemoryGameState
-import state.PersistentPlayersRepoLayer
+import state.instances.InMemoryGameState
+import state.instances.PersistentPlayersRepoLayer
 import io.getquill.jdbczio.Quill
 import io.getquill.SnakeCase
 
 object MainApp extends ZIOAppDefault {
   def run: ZIO[Environment with ZIOAppArgs with Scope, Throwable, Any] = {
-    val httpApps = GameApp() ++ PlayerApp()
+    val httpApps = GameApp() ++ CharacterApp()
 
     Server
       .serve(httpApps.withDefaultErrorResponse)

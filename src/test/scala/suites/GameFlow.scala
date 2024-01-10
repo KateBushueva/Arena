@@ -11,7 +11,8 @@ import state.GameState
 import java.util.UUID
 import units._
 import units.Game.BattleState._
-import app.PlayerFlow
+import app.CharacterFlow
+import units.Characters
 
 object GameFlowTest {
   val battleId = "b2c8ccb8-191a-4233-9b34-3e3111a4adaf"
@@ -19,28 +20,31 @@ object GameFlowTest {
   val gameUuid = UUID.fromString(battleId)
   val playerUuid = UUID.fromString(playerId)
 
-  val player = Players.CustomPlayer(Players.PlayerData(playerUuid, "Melody", 0))
+  val player =
+    Characters.CustomCharacter(
+      Characters.CharacterData(playerUuid, "Melody", 0)
+    )
 
   def mkBattleStateResponse(damage1: Int, damage2: Int): Response = {
     val response = Game.BattleState(
       gameUuid,
       player,
-      Players.BotLvl1,
+      Characters.BotLvl1,
       damage1,
       damage2
     )
     Response.json(response.toJson)
   }
 
-  def mkPlayerData(exp: Int): Players.PlayerData =
-    Players.PlayerData(playerUuid, "Melody", exp)
+  def mkCharacterData(exp: Int): Characters.CharacterData =
+    Characters.CharacterData(playerUuid, "Melody", exp)
 
   val gameFlowSuccess =
     test("Should successfully run start, hit and delete endpoints") {
       for {
         _ <- TestRandom.feedUUIDs(playerUuid, gameUuid)
         _ <- TestRandom.feedInts(4)
-        createPlayerResponse <- PlayerFlow.createPlayer("Melody")
+        createPlayerResponse <- CharacterFlow.createPlayer("Melody")
         startResponse <- startNewBattle(playerId)
         battleState1 <- getBattle(battleId)
         hitResponse1 <- hit(battleId)
@@ -49,10 +53,10 @@ object GameFlowTest {
         battleState2 <- getBattle(battleId)
         completeResponse <- completeBattle(battleId)
         allBattles <- getAllBattles()
-        updatedPlayer <- PlayerFlow.getPlayer(playerId)
+        updatedPlayer <- CharacterFlow.getPlayer(playerId)
 
       } yield assertTrue(
-        createPlayerResponse == Response.json(mkPlayerData(0).toJson),
+        createPlayerResponse == Response.json(mkCharacterData(0).toJson),
         startResponse == Response.text(battleId),
         battleState1 == mkBattleStateResponse(0, 0),
         hitResponse1 == mkBattleStateResponse(3, 4),
@@ -65,7 +69,7 @@ object GameFlowTest {
           Map.empty[UUID, Game.BattleState].map(_.toJson).toJson
         ),
         updatedPlayer == Response.json(
-          mkPlayerData(8).toJson
+          mkCharacterData(8).toJson
         )
       )
     }

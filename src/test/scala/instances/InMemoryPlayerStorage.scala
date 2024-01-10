@@ -4,16 +4,17 @@ import zio._
 import java.util.UUID
 
 import state.PlayersRepo
-import units.Players
+import units.Characters
 
-case class InMemoryPlayerStorage(storage: Ref[Map[UUID, Players.PlayerData]])
-    extends PlayersRepo {
+case class InMemoryPlayerStorage(
+    storage: Ref[Map[UUID, Characters.CharacterData]]
+) extends PlayersRepo {
 
   def addPlayer(
       name: String,
       id: UUID
-  ): UIO[Players.PlayerData] = {
-    val newData = Players.PlayerData(id, name, 0)
+  ): UIO[Characters.CharacterData] = {
+    val newData = Characters.CharacterData(id, name, 0)
     for {
       _ <- storage.update(_.updated(id, newData))
     } yield newData
@@ -22,13 +23,13 @@ case class InMemoryPlayerStorage(storage: Ref[Map[UUID, Players.PlayerData]])
   def updatePlayer(
       id: UUID,
       additionalExp: Int
-  ): UIO[Option[Players.PlayerData]] = for {
-    mPlayerData <- storage.get.map(_.get(id))
-    mUpdatedData = mPlayerData.map(playerData =>
-      Players.PlayerData(
+  ): UIO[Option[Characters.CharacterData]] = for {
+    mCharacterData <- storage.get.map(_.get(id))
+    mUpdatedData = mCharacterData.map(characterData =>
+      Characters.CharacterData(
         id,
-        playerData.name,
-        playerData.experience + additionalExp
+        characterData.name,
+        characterData.experience + additionalExp
       )
     )
     _ <- mUpdatedData match {
@@ -38,16 +39,16 @@ case class InMemoryPlayerStorage(storage: Ref[Map[UUID, Players.PlayerData]])
     }
   } yield mUpdatedData
 
-  def deletePlayer(id: UUID): UIO[Option[Players.PlayerData]] = for {
-    mPlayerData <- storage.get.map(_.get(id))
+  def deletePlayer(id: UUID): UIO[Option[Characters.CharacterData]] = for {
+    mCharacterData <- storage.get.map(_.get(id))
     _ <- storage.update(_.removed(id))
-  } yield mPlayerData
+  } yield mCharacterData
 
-  def getAllPlayers(): UIO[List[Players.PlayerData]] =
+  def getAllPlayers(): UIO[List[Characters.CharacterData]] =
     storage.get.map(_.values.toList)
 
   def getOnePlayer(
       id: UUID
-  ): UIO[Option[Players.PlayerData]] = storage.get.map(_.get(id))
+  ): UIO[Option[Characters.CharacterData]] = storage.get.map(_.get(id))
 
 }

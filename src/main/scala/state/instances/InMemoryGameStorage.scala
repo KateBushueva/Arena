@@ -1,19 +1,20 @@
-package state
+package state.instances
 
 import zio._
 
 import java.util.UUID
 
+import state.GameState
 import units.Game._
 import units.Game
-import units.Players
+import units.Characters
 
 case class InMemoryGameState(storage: Ref[Map[UUID, BattleState]])
     extends GameState {
   // For now creates a Battle with BotLvl1
-  def createBattle(player: Players.Player): UIO[Game.BattleState] = for {
+  def createBattle(player: Characters.Character): UIO[Game.BattleState] = for {
     gameId <- Random.nextUUID
-    bot = Players.selectBot(player.level.level)
+    bot = Characters.selectBot(player.level.level)
     newBattle = BattleState(
       gameId,
       player,

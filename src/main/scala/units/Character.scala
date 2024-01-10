@@ -4,7 +4,7 @@ import zio._
 import zio.json._
 import java.util.UUID
 
-object Players {
+object Characters {
 
   sealed trait LevelArgument
 
@@ -32,35 +32,35 @@ object Players {
     } yield result
   }
 
-  final case class PlayerData(id: UUID, name: String, experience: Int)
+  final case class CharacterData(id: UUID, name: String, experience: Int)
 
-  sealed trait Player {
+  sealed trait Character {
     val name: String
     val level: Level
     def hit(): UIO[Int]
   }
 
-  case class CustomPlayer(playerData: PlayerData) extends Player {
-    val name = playerData.name
-    val level = Level(Experience(playerData.experience))
+  case class CustomCharacter(characterData: CharacterData) extends Character {
+    val name = characterData.name
+    val level = Level(Experience(characterData.experience))
     def hit(): UIO[Int] = level.hit
   }
 
-  sealed case class Bot(lev: Int) extends Player {
+  sealed case class Bot(lev: Int) extends Character {
     val level = Level(Lev(lev))
     val name: String = s"BotLvl${level.level}"
     def hit(): UIO[Int] = ZIO.succeed(level.attack / 2)
   }
 
-  implicit val playerDataEncoder: JsonEncoder[PlayerData] =
-    DeriveJsonEncoder.gen[PlayerData]
-  implicit val playerDataDecoder: JsonDecoder[PlayerData] =
-    DeriveJsonDecoder.gen[PlayerData]
+  implicit val characterDataEncoder: JsonEncoder[CharacterData] =
+    DeriveJsonEncoder.gen[CharacterData]
+  implicit val characterDataDecoder: JsonDecoder[CharacterData] =
+    DeriveJsonDecoder.gen[CharacterData]
 
-  implicit val playerEncoder: JsonEncoder[Player] =
-    DeriveJsonEncoder.gen[Player]
-  implicit val playerDecoder: JsonDecoder[Player] =
-    DeriveJsonDecoder.gen[Player]
+  implicit val characterEncoder: JsonEncoder[Character] =
+    DeriveJsonEncoder.gen[Character]
+  implicit val characterDecoder: JsonDecoder[Character] =
+    DeriveJsonDecoder.gen[Character]
 
   object BotLvl1 extends Bot(1)
   object BotLvl2 extends Bot(2)
@@ -71,7 +71,7 @@ object Players {
   object BotLvl7 extends Bot(7)
   object BotLvl8 extends Bot(8)
 
-  def selectBot(level: Int): Player = level match {
+  def selectBot(level: Int): Character = level match {
     case 1 => BotLvl1
     case 2 => BotLvl2
     case 3 => BotLvl3

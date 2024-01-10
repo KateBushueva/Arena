@@ -2,11 +2,11 @@ import zio._
 import zio.test._
 import zio.Scope
 import suites._
-import state.InMemoryGameState
+import state.instances.InMemoryGameState
 import java.util.UUID
 import units.Game
 import instances.InMemoryPlayerStorage
-import units.Players
+import units.Characters
 
 object TestSuites extends ZIOSpecDefault {
   def spec: Spec[TestEnvironment with Scope, Any] =
@@ -47,7 +47,7 @@ object Layers {
     ZLayer.scoped(
       ZIO.acquireRelease(
         Ref
-          .make(Map.empty[UUID, Players.PlayerData])
+          .make(Map.empty[UUID, Characters.CharacterData])
           .map(new InMemoryPlayerStorage(_)) <* ZIO.debug(
           "New InMemory player storage initialized"
         )

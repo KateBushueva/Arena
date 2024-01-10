@@ -1,15 +1,16 @@
-package state
+package state.instances
 
 import io.getquill._
 import io.getquill.jdbczio.Quill
+// import io.getquill.util.LoadConfig
 import zio._
 
 import java.sql.SQLException
 import java.util.UUID
 import javax.sql.DataSource
 
-import units.Players.PlayerData
-import io.getquill.util.LoadConfig
+import state.PlayersRepo
+import units.Characters.CharacterData
 
 final case class PersistentPlayersRepo(src: DataSource) extends PlayersRepo {
 
@@ -19,11 +20,11 @@ final case class PersistentPlayersRepo(src: DataSource) extends PlayersRepo {
   def addPlayer(
       name: String,
       uuid: UUID
-  ): ZIO[PlayersRepo, SQLException, PlayerData] = {
-    val playerData = PlayerData(uuid, name, 0)
+  ): ZIO[PlayersRepo, SQLException, CharacterData] = {
+    val characterData = CharacterData(uuid, name, 0)
     run {
-      query[PlayerData]
-        .insertValue(lift(playerData))
+      query[CharacterData]
+        .insertValue(lift(characterData))
         .returning(a => a)
     }.provide(ZLayer.succeed(src))
   }
@@ -31,9 +32,9 @@ final case class PersistentPlayersRepo(src: DataSource) extends PlayersRepo {
   def updatePlayer(
       id: UUID,
       additionalExp: Int
-  ): ZIO[PlayersRepo, SQLException, Option[PlayerData]] =
+  ): ZIO[PlayersRepo, SQLException, Option[CharacterData]] =
     run {
-      query[PlayerData]
+      query[CharacterData]
         .filter(p => p.id == lift(id))
         .update(player =>
           player.experience -> (player.experience + lift(additionalExp))
@@ -43,25 +44,25 @@ final case class PersistentPlayersRepo(src: DataSource) extends PlayersRepo {
 
   def deletePlayer(
       id: UUID
-  ): ZIO[PlayersRepo, SQLException, Option[PlayerData]] =
+  ): ZIO[PlayersRepo, SQLException, Option[CharacterData]] =
     run {
-      query[PlayerData]
+      query[CharacterData]
         .filter(p => p.id == lift(id))
         .delete
         .returningMany(a => a)
     }.map(_.headOption).provide(ZLayer.succeed(src))
 
-  def getAllPlayers(): ZIO[PlayersRepo, SQLException, List[PlayerData]] =
+  def getAllPlayers(): ZIO[PlayersRepo, SQLException, List[CharacterData]] =
     run {
-      query[PlayerData]
+      query[CharacterData]
     }
       .provide(ZLayer.succeed(src))
 
   def getOnePlayer(
       id: UUID
-  ): ZIO[PlayersRepo, SQLException, Option[PlayerData]] =
+  ): ZIO[PlayersRepo, SQLException, Option[CharacterData]] =
     run {
-      query[PlayerData].filter(p => p.id == lift(id))
+      query[CharacterData].filter(p => p.id == lift(id))
     }
       .map(_.headOption)
       .provide(ZLayer.succeed(src))

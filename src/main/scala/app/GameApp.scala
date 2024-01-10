@@ -9,16 +9,16 @@ import java.util.UUID
 import state.GameState
 import state.PlayersRepo
 import units.Game.BattleState._
-import units.Players
-import units.Players.Bot
-import units.Players.CustomPlayer
+import units.Characters
+import units.Characters.Bot
+import units.Characters.CustomCharacter
 
 object GameApp {
   def apply(): Http[GameState with PlayersRepo, Throwable, Request, Response] =
     Http.collectZIO[Request] {
       case Method.GET -> Root / "allBattles" => GameFlow.getAllBattles()
-      case Method.GET -> Root / "start" / playerId =>
-        GameFlow.startNewBattle(playerId)
+      case Method.GET -> Root / "start" / characterId =>
+        GameFlow.startNewBattle(characterId)
       case Method.GET -> Root / "getBattle" / battleId =>
         GameFlow.getBattle(battleId)
       case Method.GET -> Root / "hit" / battleId => GameFlow.hit(battleId)
@@ -39,9 +39,9 @@ object GameFlow {
     val uuid = UUID.fromString(id)
     for {
       resp <- PlayersRepo.getOnePlayer(uuid).flatMap {
-        case Some(playerData) =>
+        case Some(data) =>
           GameState
-            .createBattle(Players.CustomPlayer(playerData))
+            .createBattle(Characters.CustomCharacter(data))
             .map(battle => Response.text(battle.gameId.toString))
         case None => ZIO.succeed(Response.status(Status.NotFound))
       }
@@ -80,10 +80,10 @@ object GameFlow {
                     .map(_ =>
                       Response.text(s"The battle is over, ${player.name} won")
                     )
-                case CustomPlayer(playerData) =>
+                case CustomCharacter(data) =>
                   for {
                     mUpdated <- PlayersRepo.updatePlayer(
-                      playerData.id,
+                      data.id,
                       battleState.experienceReceived
                     )
                     resp <- mUpdated match {
@@ -119,11 +119,11 @@ object GameFlow {
               )
             case _ =>
               for {
-                hit1 <- battleState.player1.hit()
-                hit2 <- battleState.player2.hit()
+                hit1 <- battleState.combatant1.hit()
+                hit2 <- battleState.combatant2.hit()
                 updatedState = battleState
-                  .addDamage(battleState.player1, hit2)
-                  .addDamage(battleState.player2, hit1)
+                  .addDamage(battleState.combatant1, hit2)
+                  .addDamage(battleState.combatant2, hit1)
                 response <- GameState
                   .updateBattle(
                     battleState.gameId,
