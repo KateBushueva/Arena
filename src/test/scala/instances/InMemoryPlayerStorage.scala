@@ -10,7 +10,7 @@ case class InMemoryPlayerStorage(
     storage: Ref[Map[UUID, Characters.CharacterData]]
 ) extends PlayersRepo {
 
-  def addPlayer(
+  def addCharacter(
       name: String,
       id: UUID
   ): UIO[Characters.CharacterData] = {
@@ -20,7 +20,7 @@ case class InMemoryPlayerStorage(
     } yield newData
   }
 
-  def updatePlayer(
+  def updateCharacter(
       id: UUID,
       additionalExp: Int
   ): UIO[Option[Characters.CharacterData]] = for {
@@ -39,15 +39,15 @@ case class InMemoryPlayerStorage(
     }
   } yield mUpdatedData
 
-  def deletePlayer(id: UUID): UIO[Option[Characters.CharacterData]] = for {
+  def deleteCharacter(id: UUID): UIO[Option[Characters.CharacterData]] = for {
     mCharacterData <- storage.get.map(_.get(id))
     _ <- storage.update(_.removed(id))
   } yield mCharacterData
 
-  def getAllPlayers(): UIO[List[Characters.CharacterData]] =
+  def getAllCharacters(): UIO[List[Characters.CharacterData]] =
     storage.get.map(_.values.toList)
 
-  def getOnePlayer(
+  def getOneCharacter(
       id: UUID
   ): UIO[Option[Characters.CharacterData]] = storage.get.map(_.get(id))
 

@@ -21,17 +21,21 @@ object PlayerFlowTest {
 
       for {
         _ <- TestRandom.feedUUIDs(GameFlowTest.playerUuid)
-        createPlayerResponse <- CharacterFlow.createPlayer("Melody")
-        characterDataFromStorage <- CharacterFlow.getPlayer(
+        createPlayerResponse <- CharacterFlow.createCharacter("Melody")
+        characterDataFromStorage <- CharacterFlow.getCharacter(
           GameFlowTest.playerId
         )
-        updateCharacterData <- PlayersRepo.updatePlayer(
+        updateCharacterData <- PlayersRepo.updateCharacter(
           GameFlowTest.playerUuid,
           50
         )
-        updatedDataFromStorage <- CharacterFlow.getPlayer(GameFlowTest.playerId)
-        deleteResponse <- CharacterFlow.deletePlayer(GameFlowTest.playerId)
-        deletedDataFromStorage <- CharacterFlow.getPlayer(GameFlowTest.playerId)
+        updatedDataFromStorage <- CharacterFlow.getCharacter(
+          GameFlowTest.playerId
+        )
+        deleteResponse <- CharacterFlow.deleteCharacter(GameFlowTest.playerId)
+        deletedDataFromStorage <- CharacterFlow.getCharacter(
+          GameFlowTest.playerId
+        )
       } yield assertTrue(
         createPlayerResponse == Response.json(
           GameFlowTest.mkCharacterData(0).toJson
@@ -52,11 +56,13 @@ object PlayerFlowTest {
   val updatePlayerFailTest =
     test("Should not update anything if player is not in storage") {
       for {
-        updateCharacterData <- PlayersRepo.updatePlayer(
+        updateCharacterData <- PlayersRepo.updateCharacter(
           GameFlowTest.playerUuid,
           50
         )
-        updatedDataFromStorage <- CharacterFlow.getPlayer(GameFlowTest.playerId)
+        updatedDataFromStorage <- CharacterFlow.getCharacter(
+          GameFlowTest.playerId
+        )
       } yield assertTrue(
         updateCharacterData == None,
         updatedDataFromStorage == Response.status(Status.NotFound)
@@ -65,10 +71,12 @@ object PlayerFlowTest {
   val deletePlayerFailTest =
     test("Should not delete anything if player is not in storage") {
       for {
-        deletedCharacterData <- PlayersRepo.deletePlayer(
+        deletedCharacterData <- PlayersRepo.deleteCharacter(
           GameFlowTest.playerUuid
         )
-        deletedDataFromStorage <- CharacterFlow.getPlayer(GameFlowTest.playerId)
+        deletedDataFromStorage <- CharacterFlow.getCharacter(
+          GameFlowTest.playerId
+        )
       } yield assertTrue(
         deletedCharacterData == None,
         deletedDataFromStorage == Response.status(Status.NotFound)

@@ -38,7 +38,7 @@ object GameFlow {
   ): ZIO[GameState with PlayersRepo, Throwable, Response] = {
     val uuid = UUID.fromString(id)
     for {
-      resp <- PlayersRepo.getOnePlayer(uuid).flatMap {
+      resp <- PlayersRepo.getOneCharacter(uuid).flatMap {
         case Some(data) =>
           GameState
             .createBattle(Characters.CustomCharacter(data))
@@ -82,7 +82,7 @@ object GameFlow {
                     )
                 case CustomCharacter(data) =>
                   for {
-                    mUpdated <- PlayersRepo.updatePlayer(
+                    mUpdated <- PlayersRepo.updateCharacter(
                       data.id,
                       battleState.experienceReceived
                     )

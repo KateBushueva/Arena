@@ -13,41 +13,44 @@ object CharacterApp {
   def apply(): Http[PlayersRepo, Throwable, Request, Response] =
     Http.collectZIO[Request] {
       case Method.GET -> Root / "character" / "allCharacters" =>
-        CharacterFlow.getAllPlayers()
+        CharacterFlow.getAllCharacters()
       case Method.GET -> Root / "character" / "newCharacter" / name =>
-        CharacterFlow.createPlayer(name)
+        CharacterFlow.createCharacter(name)
       case Method.GET -> Root / "character" / "getCharacter" / id =>
-        CharacterFlow.getPlayer(id)
+        CharacterFlow.getCharacter(id)
       case Method.GET -> Root / "character" / "deleteCharacter" / id =>
-        CharacterFlow.deletePlayer(id)
+        CharacterFlow.deleteCharacter(id)
     }
 }
 
 object CharacterFlow {
-  def getAllPlayers(): ZIO[PlayersRepo, Throwable, Response] =
+  def getAllCharacters(): ZIO[PlayersRepo, Throwable, Response] =
     PlayersRepo
-      .getAllPlayers()
+      .getAllCharacters()
       .map(players => Response.json(players.map(_.toJson).toJson))
 
-  def createPlayer(name: String): ZIO[PlayersRepo, Throwable, Response] = for {
-    uuid <- Random.nextUUID
-    resp <- PlayersRepo
-      .addPlayer(name, uuid)
-      .map(characterData => Response.json(characterData.toJson))
-  } yield resp
+  def createCharacter(name: String): ZIO[PlayersRepo, Throwable, Response] =
+    for {
+      uuid <- Random.nextUUID
+      resp <- PlayersRepo
+        .addCharacter(name, uuid)
+        .map(characterData => Response.json(characterData.toJson))
+    } yield resp
 
-  def getPlayer(id: String): ZIO[PlayersRepo, Throwable, Response] = {
+  def getCharacter(id: String): ZIO[PlayersRepo, Throwable, Response] = {
     val uuid = UUID.fromString(id)
     PlayersRepo
-      .getOnePlayer(uuid)
+      .getOneCharacter(uuid)
       .map {
         case Some(player) =>
           Response.json(player.toJson)
         case None => Response.status(Status.NotFound)
       }
   }
-  def deletePlayer(id: String): ZIO[PlayersRepo, Throwable, Response] = {
+  def deleteCharacter(id: String): ZIO[PlayersRepo, Throwable, Response] = {
     val uuid = UUID.fromString(id)
-    PlayersRepo.deletePlayer(uuid).map(player => Response.json(player.toJson))
+    PlayersRepo
+      .deleteCharacter(uuid)
+      .map(player => Response.json(player.toJson))
   }
 }

@@ -51,6 +51,6 @@ object Layers {
           .map(new InMemoryPlayerStorage(_)) <* ZIO.debug(
           "New InMemory player storage initialized"
         )
-      )(storage => storage.getAllPlayers.debug("InMemory player storage"))
+      )(storage => storage.getAllCharacters.debug("InMemory player storage"))
     )
 }

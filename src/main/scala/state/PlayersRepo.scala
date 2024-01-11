@@ -8,42 +8,46 @@ import units.Characters.CharacterData
 
 trait PlayersRepo {
 
-  def addPlayer(
+  def addCharacter(
       name: String,
       id: UUID
   ): ZIO[PlayersRepo, Throwable, CharacterData]
-  def updatePlayer(
+  def updateCharacter(
       id: UUID,
       additionalExp: Int
   ): ZIO[PlayersRepo, Throwable, Option[CharacterData]]
-  def deletePlayer(id: UUID): ZIO[PlayersRepo, Throwable, Option[CharacterData]]
-  def getAllPlayers(): ZIO[PlayersRepo, Throwable, List[CharacterData]]
-  def getOnePlayer(id: UUID): ZIO[PlayersRepo, Throwable, Option[CharacterData]]
+  def deleteCharacter(
+      id: UUID
+  ): ZIO[PlayersRepo, Throwable, Option[CharacterData]]
+  def getAllCharacters(): ZIO[PlayersRepo, Throwable, List[CharacterData]]
+  def getOneCharacter(
+      id: UUID
+  ): ZIO[PlayersRepo, Throwable, Option[CharacterData]]
 }
 
 object PlayersRepo {
-  def addPlayer(
+  def addCharacter(
       name: String,
       id: UUID
   ): ZIO[PlayersRepo, Throwable, CharacterData] =
-    ZIO.serviceWithZIO[PlayersRepo](_.addPlayer(name, id))
+    ZIO.serviceWithZIO[PlayersRepo](_.addCharacter(name, id))
 
-  def updatePlayer(
+  def updateCharacter(
       id: UUID,
       additionalExp: Int
   ): ZIO[PlayersRepo, Throwable, Option[CharacterData]] =
-    ZIO.serviceWithZIO[PlayersRepo](_.updatePlayer(id, additionalExp))
+    ZIO.serviceWithZIO[PlayersRepo](_.updateCharacter(id, additionalExp))
 
-  def deletePlayer(
+  def deleteCharacter(
       id: UUID
   ): ZIO[PlayersRepo, Throwable, Option[CharacterData]] =
-    ZIO.serviceWithZIO[PlayersRepo](_.deletePlayer(id))
+    ZIO.serviceWithZIO[PlayersRepo](_.deleteCharacter(id))
 
-  def getAllPlayers(): ZIO[PlayersRepo, Throwable, List[CharacterData]] =
-    ZIO.serviceWithZIO[PlayersRepo](_.getAllPlayers())
+  def getAllCharacters(): ZIO[PlayersRepo, Throwable, List[CharacterData]] =
+    ZIO.serviceWithZIO[PlayersRepo](_.getAllCharacters())
 
-  def getOnePlayer(
+  def getOneCharacter(
       id: UUID
   ): ZIO[PlayersRepo, Throwable, Option[CharacterData]] =
-    ZIO.serviceWithZIO[PlayersRepo](_.getOnePlayer(id))
+    ZIO.serviceWithZIO[PlayersRepo](_.getOneCharacter(id))
 }

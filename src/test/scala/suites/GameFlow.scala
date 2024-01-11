@@ -44,7 +44,7 @@ object GameFlowTest {
       for {
         _ <- TestRandom.feedUUIDs(playerUuid, gameUuid)
         _ <- TestRandom.feedInts(4)
-        createPlayerResponse <- CharacterFlow.createPlayer("Melody")
+        createPlayerResponse <- CharacterFlow.createCharacter("Melody")
         startResponse <- startNewBattle(playerId)
         battleState1 <- getBattle(battleId)
         hitResponse1 <- hit(battleId)
@@ -53,7 +53,7 @@ object GameFlowTest {
         battleState2 <- getBattle(battleId)
         completeResponse <- completeBattle(battleId)
         allBattles <- getAllBattles()
-        updatedPlayer <- CharacterFlow.getPlayer(playerId)
+        updatedPlayer <- CharacterFlow.getCharacter(playerId)
 
       } yield assertTrue(
         createPlayerResponse == Response.json(mkCharacterData(0).toJson),

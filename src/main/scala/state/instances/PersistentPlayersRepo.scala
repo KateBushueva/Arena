@@ -17,7 +17,7 @@ final case class PersistentPlayersRepo(src: DataSource) extends PlayersRepo {
   val ctx = new PostgresZioJdbcContext(SnakeCase)
   import ctx._
 
-  def addPlayer(
+  def addCharacter(
       name: String,
       uuid: UUID
   ): ZIO[PlayersRepo, SQLException, CharacterData] = {
@@ -29,7 +29,7 @@ final case class PersistentPlayersRepo(src: DataSource) extends PlayersRepo {
     }.provide(ZLayer.succeed(src))
   }
 
-  def updatePlayer(
+  def updateCharacter(
       id: UUID,
       additionalExp: Int
   ): ZIO[PlayersRepo, SQLException, Option[CharacterData]] =
@@ -42,7 +42,7 @@ final case class PersistentPlayersRepo(src: DataSource) extends PlayersRepo {
         .returningMany(a => a)
     }.map(_.headOption).provide(ZLayer.succeed(src))
 
-  def deletePlayer(
+  def deleteCharacter(
       id: UUID
   ): ZIO[PlayersRepo, SQLException, Option[CharacterData]] =
     run {
@@ -52,13 +52,13 @@ final case class PersistentPlayersRepo(src: DataSource) extends PlayersRepo {
         .returningMany(a => a)
     }.map(_.headOption).provide(ZLayer.succeed(src))
 
-  def getAllPlayers(): ZIO[PlayersRepo, SQLException, List[CharacterData]] =
+  def getAllCharacters(): ZIO[PlayersRepo, SQLException, List[CharacterData]] =
     run {
       query[CharacterData]
     }
       .provide(ZLayer.succeed(src))
 
-  def getOnePlayer(
+  def getOneCharacter(
       id: UUID
   ): ZIO[PlayersRepo, SQLException, Option[CharacterData]] =
     run {
