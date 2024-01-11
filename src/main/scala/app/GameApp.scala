@@ -17,8 +17,8 @@ object GameApp {
   def apply(): Http[GameState with PlayersRepo, Throwable, Request, Response] =
     Http.collectZIO[Request] {
       case Method.GET -> Root / "allBattles" => GameFlow.getAllBattles()
-      case Method.GET -> Root / "start" / characterId =>
-        GameFlow.startNewBattle(characterId)
+      case Method.GET -> Root / "startWithBot" / characterId =>
+        GameFlow.startWithBot(characterId)
       case Method.GET -> Root / "getBattle" / battleId =>
         GameFlow.getBattle(battleId)
       case Method.GET -> Root / "hit" / battleId => GameFlow.hit(battleId)
@@ -33,16 +33,19 @@ object GameFlow {
       .getBattles()
       .map(battles => Response.json(battles.map(_.toJson).toJson))
 
-  def startNewBattle(
+  def startWithBot(
       id: String
   ): ZIO[GameState with PlayersRepo, Throwable, Response] = {
     val uuid = UUID.fromString(id)
     for {
       resp <- PlayersRepo.getOneCharacter(uuid).flatMap {
-        case Some(data) =>
+        case Some(characterData) => {
+          val character = Characters.CustomCharacter(characterData)
+          val bot = Characters.selectBot(character.level.level)
           GameState
-            .createBattle(Characters.CustomCharacter(data))
+            .createBattle(character, bot)
             .map(battle => Response.text(battle.gameId.toString))
+        }
         case None => ZIO.succeed(Response.status(Status.NotFound))
       }
     } yield resp

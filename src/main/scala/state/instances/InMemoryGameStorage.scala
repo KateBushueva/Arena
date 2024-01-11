@@ -11,14 +11,15 @@ import units.Characters
 
 case class InMemoryGameState(storage: Ref[Map[UUID, BattleState]])
     extends GameState {
-  // For now creates a Battle with BotLvl1
-  def createBattle(player: Characters.Character): UIO[Game.BattleState] = for {
+  def createBattle(
+      combatant1: Characters.Character,
+      combatant2: Characters.Character
+  ): UIO[Game.BattleState] = for {
     gameId <- Random.nextUUID
-    bot = Characters.selectBot(player.level.level)
     newBattle = BattleState(
       gameId,
-      player,
-      bot
+      combatant1,
+      combatant2
     )
     _ <- storage.update(_.updated(gameId, newBattle))
   } yield newBattle

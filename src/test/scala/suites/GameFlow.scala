@@ -45,7 +45,7 @@ object GameFlowTest {
         _ <- TestRandom.feedUUIDs(playerUuid, gameUuid)
         _ <- TestRandom.feedInts(4)
         createPlayerResponse <- CharacterFlow.createCharacter("Melody")
-        startResponse <- startNewBattle(playerId)
+        startResponse <- startWithBot(playerId)
         battleState1 <- getBattle(battleId)
         hitResponse1 <- hit(battleId)
         _ <- hit(battleId)

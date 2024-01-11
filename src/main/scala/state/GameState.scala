@@ -8,7 +8,10 @@ import units.Game
 import units.Characters
 
 trait GameState {
-  def createBattle(player: Characters.Character): Task[Game.BattleState]
+  def createBattle(
+      combatant1: Characters.Character,
+      combatant2: Characters.Character
+  ): Task[Game.BattleState]
   def updateBattle(
       id: UUID,
       newBattle: Game.BattleState
@@ -20,9 +23,10 @@ trait GameState {
 
 object GameState {
   def createBattle(
-      player: Characters.Character
+      combatant1: Characters.Character,
+      combatant2: Characters.Character
   ): ZIO[GameState, Throwable, Game.BattleState] =
-    ZIO.serviceWithZIO[GameState](_.createBattle(player))
+    ZIO.serviceWithZIO[GameState](_.createBattle(combatant1, combatant2))
 
   def updateBattle(
       id: UUID,
