@@ -2,6 +2,7 @@ import zio._
 import zio.http._
 
 import app._
+import state.instances.InMemoryBattleBuilderState
 import state.instances.InMemoryGameState
 import state.instances.PersistentPlayersRepoLayer
 import io.getquill.jdbczio.Quill
@@ -17,7 +18,8 @@ object MainApp extends ZIOAppDefault {
         Server.defaultWithPort(8080),
         InMemoryGameState.layer,
         Quill.DataSource.fromPrefix("playerDatabaseConfig"),
-        PersistentPlayersRepoLayer.layer
+        PersistentPlayersRepoLayer.layer,
+        InMemoryBattleBuilderState.layer
       )
   }
 }

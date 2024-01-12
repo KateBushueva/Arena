@@ -61,9 +61,18 @@ object Game {
     ): BattleState =
       new BattleState(gameId, player1, player2, 0, 0)
 
-    implicit val encoder: JsonEncoder[BattleState] =
+    implicit val battleStateEncoder: JsonEncoder[BattleState] =
       DeriveJsonEncoder.gen[BattleState]
-    implicit val decoder: JsonDecoder[BattleState] =
+    implicit val battleStateDecoder: JsonDecoder[BattleState] =
       DeriveJsonDecoder.gen[BattleState]
+  }
+
+  final case class BattleBuilder(builderId: UUID, creator: Character)
+
+  object BattleBuilder {
+    implicit val battleBuilderEncoder: JsonEncoder[BattleBuilder] =
+      DeriveJsonEncoder.gen[BattleBuilder]
+    implicit val battleBuilderDecoder: JsonDecoder[BattleBuilder] =
+      DeriveJsonDecoder.gen[BattleBuilder]
   }
 }

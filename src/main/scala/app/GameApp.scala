@@ -7,6 +7,7 @@ import zio.json._
 import java.util.UUID
 
 import state.GameState
+import state.P2pBuilderState
 import state.PlayersRepo
 import units.Game.BattleState._
 import units.Characters
@@ -14,11 +15,20 @@ import units.Characters.Bot
 import units.Characters.CustomCharacter
 
 object GameApp {
-  def apply(): Http[GameState with PlayersRepo, Throwable, Request, Response] =
+  def apply(): Http[
+    GameState with PlayersRepo with P2pBuilderState,
+    Throwable,
+    Request,
+    Response
+  ] =
+    // TODO: replace GET requests with POST requests with corresponding request bodies
     Http.collectZIO[Request] {
       case Method.GET -> Root / "allBattles" => GameFlow.getAllBattles()
+      case Method.GET -> Root / "allP2ps"    => GameFlow.getAllP2ps()
       case Method.GET -> Root / "startWithBot" / characterId =>
         GameFlow.startWithBot(characterId)
+      case Method.GET -> Root / "createBattle" / characterId =>
+        GameFlow.createBattle(characterId)
       case Method.GET -> Root / "getBattle" / battleId =>
         GameFlow.getBattle(battleId)
       case Method.GET -> Root / "hit" / battleId => GameFlow.hit(battleId)
@@ -33,6 +43,11 @@ object GameFlow {
       .getBattles()
       .map(battles => Response.json(battles.map(_.toJson).toJson))
 
+  def getAllP2ps(): ZIO[P2pBuilderState, Throwable, Response] =
+    P2pBuilderState
+      .getAllP2ps()
+      .map(p2ps => Response.json(p2ps.map(_.toJson).toJson))
+
   def startWithBot(
       id: String
   ): ZIO[GameState with PlayersRepo, Throwable, Response] = {
@@ -45,6 +60,23 @@ object GameFlow {
           GameState
             .createBattle(character, bot)
             .map(battle => Response.text(battle.gameId.toString))
+        }
+        case None => ZIO.succeed(Response.status(Status.NotFound))
+      }
+    } yield resp
+  }
+
+  def createBattle(
+      id: String
+  ): ZIO[P2pBuilderState with PlayersRepo, Throwable, Response] = {
+    val uuid = UUID.fromString(id)
+    for {
+      resp <- PlayersRepo.getOneCharacter(uuid).flatMap {
+        case Some(characterData) => {
+          val creator = Characters.CustomCharacter(characterData)
+          P2pBuilderState
+            .createP2p(creator)
+            .map(p2p => Response.text(p2p.builderId.toString))
         }
         case None => ZIO.succeed(Response.status(Status.NotFound))
       }
@@ -107,7 +139,7 @@ object GameFlow {
           }
       }
   }
-
+  // TODO: fix the endpoint to get hit requests from different users
   def hit(id: String): ZIO[GameState, Throwable, Response] = {
     val uuid = UUID.fromString(id)
     GameState
