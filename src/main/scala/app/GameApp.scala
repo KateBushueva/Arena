@@ -13,6 +13,7 @@ import units.Game.BattleState._
 import units.Characters
 import units.Characters.Bot
 import units.Characters.CustomCharacter
+import userdata._
 
 object GameApp {
   def apply(): Http[
@@ -21,20 +22,67 @@ object GameApp {
     Request,
     Response
   ] =
-    // TODO: replace GET requests with POST requests with corresponding request bodies
     Http.collectZIO[Request] {
       case Method.GET -> Root / "allBattles" => GameFlow.getAllBattles()
       case Method.GET -> Root / "allP2ps"    => GameFlow.getAllP2ps()
-      case Method.GET -> Root / "startWithBot" / characterId =>
-        GameFlow.startWithBot(characterId)
-      case Method.GET -> Root / "createBattle" / characterId =>
-        GameFlow.createBattle(characterId)
       case Method.GET -> Root / "getBattle" / battleId =>
         GameFlow.getBattle(battleId)
-      case Method.GET -> Root / "hit" / battleId => GameFlow.hit(battleId)
-      case Method.GET -> Root / "completeBattle" / battleId =>
-        GameFlow.completeBattle(battleId)
+      case req @ (Method.POST -> Root / "startWithBot") =>
+        RequestHandler.runWithReqBody[
+          GameUserData.StartGameData,
+          GameState with PlayersRepo
+        ](
+          req,
+          _.characterId,
+          GameFlow.startWithBot
+        )
+      case req @ (Method.POST -> Root / "createBattle") =>
+        RequestHandler.runWithReqBody[
+          GameUserData.StartGameData,
+          P2pBuilderState with PlayersRepo
+        ](
+          req,
+          _.characterId,
+          GameFlow.createBattle
+        )
+      case req @ (Method.POST -> Root / "hit") =>
+        RequestHandler.runWithReqBody[
+          GameUserData.HitData,
+          GameState
+        ](
+          req,
+          _.battleId,
+          GameFlow.hit
+        )
+      case req @ (Method.POST -> Root / "completeBattle") =>
+        RequestHandler.runWithReqBody[
+          GameUserData.CompleteBattleData,
+          GameState with PlayersRepo
+        ](req, _.battleId, GameFlow.completeBattle)
     }
+}
+
+object RequestHandler {
+  def runWithReqBody[bodyType, envType](
+      req: Request,
+      getter: bodyType => String,
+      endpoint: String => ZIO[envType, Throwable, Response]
+  )(implicit
+      decoder: JsonDecoder[bodyType]
+  ): ZIO[envType, Throwable, Response] = for {
+    eiData <- req.body.asString.map(
+      _.fromJson[bodyType]
+    )
+    resp <- eiData match {
+      case Left(err) =>
+        ZIO
+          .debug(s"Failed to parse the input: $err")
+          .as(
+            Response.text(err).withStatus(Status.BadRequest)
+          )
+      case Right(data) => endpoint(getter(data))
+    }
+  } yield resp
 }
 
 object GameFlow {
